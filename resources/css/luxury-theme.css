@@ -1,0 +1,10 @@
+/* Luxury Theme Override */
+:root {
+    --primary-luxury: #1a1a1a;
+    --accent-gold: #d4af37;
+}
+
+.luxury-header {
+    background-color: var(--primary-luxury);
+    color: var(--accent-gold);
+}
