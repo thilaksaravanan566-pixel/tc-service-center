@@ -17,6 +17,14 @@ class InvoiceItem extends Model
         'quantity',
         'price',
         'total',
+        'hsn_sac',
+        'discount_amount',
+        'discount_percentage',
+        'tax_percentage',
+        'tax_amount',
+        'cgst_amount',
+        'sgst_amount',
+        'igst_amount',
     ];
 
     public function invoice()

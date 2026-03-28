@@ -65,7 +65,16 @@ return [
     |
     */
 
-    'timezone' => 'UTC',
+    'timezone' => env('APP_TIMEZONE', 'Asia/Kolkata'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Base Domain (for Subdomain Routing)
+    |--------------------------------------------------------------------------
+    | Used for subdomain-based route groups:
+    |   admin.{base_domain}, dealer.{base_domain}, customer.{base_domain}
+    */
+    'base_domain' => env('APP_BASE_DOMAIN', '127.0.0.1'),
 
     /*
     |--------------------------------------------------------------------------

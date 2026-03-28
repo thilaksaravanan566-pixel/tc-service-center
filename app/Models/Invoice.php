@@ -39,6 +39,23 @@ class Invoice extends Model
         'notes',
         'pdf_path',
         'dealer_order_id',
+        'cgst_amount',
+        'sgst_amount',
+        'igst_amount',
+        'round_off',
+        'is_draft',
+        'qr_code_path',
+        'barcode_path',
+        'template_name',
+        'bill_type',
+        'valid_until',
+        'parent_estimate_id',
+        'customer_gst',
+        'state_code',
+    ];
+
+    protected $casts = [
+        'valid_until' => 'date',
     ];
 
     public function customer()
@@ -69,5 +86,15 @@ class Invoice extends Model
     public function items()
     {
         return $this->hasMany(InvoiceItem::class);
+    }
+
+    public function estimateFrom()
+    {
+        return $this->belongsTo(Invoice::class, 'parent_estimate_id');
+    }
+
+    public function convertedTo()
+    {
+        return $this->hasOne(Invoice::class, 'parent_estimate_id');
     }
 }

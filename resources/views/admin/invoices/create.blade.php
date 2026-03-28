@@ -8,8 +8,14 @@
     {{-- HEADER --}}
     <div class="flex items-center justify-between mb-8 fade-up">
         <div>
-            <h1 class="text-3xl font-black text-white tracking-tight italic uppercase">Manual <span class="text-indigo-500">Billing</span></h1>
-            <p class="text-gray-500 text-xs font-bold uppercase tracking-widest mt-1">Generate professional invoices for service orders</p>
+            <h1 class="text-3xl font-black text-white tracking-tight italic uppercase">
+                <span x-text="billType === 'estimation' ? 'Generate' : 'Manual'"></span> 
+                <span :class="billType === 'estimation' ? 'text-sky-500' : 'text-emerald-500'" x-text="billType === 'estimation' ? 'Estimation' : 'Tax Invoice'"></span>
+            </h1>
+            <p class="text-gray-500 text-xs font-bold uppercase tracking-widest mt-1">
+                <span x-show="billType === 'estimation'">Create an editable quotation for customers</span>
+                <span x-show="billType === 'gst'">Generate a legal tax invoice (Locks after saving)</span>
+            </p>
         </div>
         <div class="flex gap-3">
             <a href="{{ route('admin.invoices.index') }}" class="px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-gray-400 hover:text-white transition-all text-sm font-bold flex items-center gap-2">
@@ -82,13 +88,14 @@
                             <span class="text-gray-500 font-bold uppercase tracking-widest text-[10px]">Net Subtotal</span>
                             <span class="text-white font-bold" x-text="formatINR(subtotal)"></span>
                         </div>
-                        <div class="flex justify-between items-center text-sm">
+                        <div class="flex justify-between items-center text-sm" x-show="billType === 'gst'">
                             <div class="flex items-center gap-2">
                                 <span class="text-gray-500 font-bold uppercase tracking-widest text-[10px]">Applied GST (%)</span>
                                 <input type="number" name="gst_percentage" x-model.number="gstPercent" @input="updateTotals()" class="w-12 bg-white/5 border border-white/10 rounded px-1.5 py-0.5 text-[10px] text-indigo-400 font-black outline-none focus:border-indigo-500">
                             </div>
                             <span class="text-white font-bold" x-text="formatINR(gstAmount)"></span>
                         </div>
+                        <input type="hidden" name="gst_percentage" :value="billType === 'gst' ? gstPercent : 0" x-if="billType === 'estimation'">
                         <div class="flex justify-between items-center pt-4 border-t border-white/10">
                             <span class="text-indigo-400 font-black uppercase tracking-widest text-xs italic">Grand Payable</span>
                             <span class="text-2xl font-black text-white italic tracking-tighter" x-text="formatINR(total)"></span>
@@ -109,21 +116,33 @@
                 {{-- INVOICE IDENTITY --}}
                 <div class="card p-5 border-white/5">
                     <h3 class="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-4">Invoice Identity</h3>
-                    <div class="space-y-4">
+                    <div class="space-y-6">
                         <div>
-                            <label class="text-[10px] font-black text-gray-400 uppercase mb-1 block">Invoice Number</label>
-                            <input type="text" name="invoice_number" value="{{ $nextNumber }}" class="w-full bg-white/5 border border-white/10 rounded-lg p-2.5 text-white font-bold text-xs ring-0 outline-none focus:border-indigo-500" readonly>
+                            <label class="text-[10px] font-black text-gray-400 uppercase mb-2 block">Document Type (Estimation / GST)</label>
+                            <div class="flex bg-white/5 rounded-xl p-1 gap-1 border border-white/10">
+                                <button type="button" @click="billType = 'estimation'; updateTotals()" :class="billType === 'estimation' ? 'bg-sky-500 text-white shadow-lg' : 'text-gray-400 hover:text-white'" class="flex-1 py-2.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all">Estimation (Quote)</button>
+                                <button type="button" @click="billType = 'gst'; updateTotals()" :class="billType === 'gst' ? 'bg-emerald-500 text-white shadow-lg' : 'text-gray-400 hover:text-white'" class="flex-1 py-2.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all">GST Tax Invoice</button>
+                            </div>
+                            <input type="hidden" name="bill_type" :value="billType">
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-black text-gray-400 uppercase mb-1 block">Document Number</label>
+                            <input type="text" name="invoice_number" :value="invoiceNumber" class="w-full bg-white/5 border border-white/10 rounded-lg p-2.5 text-white font-bold text-xs ring-0 outline-none" readonly>
+                        </div>
+                        <div x-show="billType === 'estimation'">
+                            <label class="text-[10px] font-black text-gray-400 uppercase mb-1 block">Valid Until (Optional)</label>
+                            <input type="date" name="valid_until" class="w-full bg-white/5 border border-white/10 rounded-lg p-2.5 text-white font-bold text-xs outline-none focus:border-indigo-500 [&::-webkit-calendar-picker-indicator]:invert">
                         </div>
                         <div>
                             <label class="text-[10px] font-black text-gray-400 uppercase mb-1 block">Billing Category</label>
                             <div class="flex gap-2">
                                 <template x-for="type in ['dealer', 'online', 'walkin']">
-                                    <button type="button" @click="billingType = type" :class="billingType === type ? 'bg-indigo-600 text-white border-indigo-500' : 'bg-white/5 text-gray-500 border-white/10'" class="flex-1 py-2 rounded-lg border text-[9px] font-black uppercase tracking-widest transition-all">
+                                    <button type="button" @click="customerType = type" :class="customerType === type ? 'bg-indigo-600 text-white border-indigo-500' : 'bg-white/5 text-gray-500 border-white/10'" class="flex-1 py-2 rounded-lg border text-[9px] font-black uppercase tracking-widest transition-all">
                                         <span x-text="type"></span>
                                     </button>
                                 </template>
                             </div>
-                            <input type="hidden" name="billing_type" :value="billingType">
+                            <input type="hidden" name="billing_type" :value="customerType">
                         </div>
                     </div>
                 </div>
@@ -142,6 +161,14 @@
                         <div>
                             <label class="text-[10px] font-black text-gray-400 uppercase mb-1 block">Mobile / Contact</label>
                             <input type="text" name="phone" value="{{ $order ? ($order->device->customer->mobile ?? $order->dealer->mobile ?? '') : '' }}" class="w-full bg-white/5 border border-white/10 rounded-lg p-2.5 text-white font-bold text-xs outline-none focus:border-indigo-500" required>
+                        </div>
+                        <div x-show="billType === 'gst'">
+                            <label class="text-[10px] font-black text-emerald-400 uppercase mb-1 flex justify-between items-center">
+                                <span>🧾 Customer GSTIN (B2B)</span>
+                                <span x-show="isGstValid === true" class="text-emerald-400">✅</span>
+                                <span x-show="isGstValid === false" class="text-rose-500">❌ Invalid Format</span>
+                            </label>
+                            <input type="text" name="customer_gst" x-model="customerGst" @input="customerGst = $event.target.value.toUpperCase()" placeholder="e.g. 33ABCDE1234F1Z5" maxlength="15" :class="isGstValid === false ? 'border-rose-500 focus:border-rose-500' : (isGstValid === true ? 'border-emerald-500 focus:border-emerald-500' : 'border-white/10 focus:border-emerald-500')" class="w-full bg-white/5 border rounded-lg p-2.5 text-white font-bold text-xs outline-none transition-all uppercase placeholder-gray-600">
                         </div>
                         <div>
                             <label class="text-[10px] font-black text-gray-400 uppercase mb-1 block">Email (Optional)</label>
@@ -208,11 +235,24 @@ function invoiceSystem() {
             @endif
         ],
         gstPercent: 18,
-        billingType: '{{ $order->order_type ?? "walkin" }}',
+        billType: 'estimation',
+        nextEstimateNumber: '{{ $nextEstimateNumber }}',
+        nextGstNumber: '{{ $nextGstNumber }}',
+        customerType: '{{ $order->order_type ?? "walkin" }}',
         payStatus: '{{ $order && $order->is_paid ? "paid" : "unpaid" }}',
+        customerGst: '{{ $order && $order->device && $order->device->customer ? $order->device->customer->gst_number : '' }}',
         subtotal: 0,
         gstAmount: 0,
         total: 0,
+
+        get invoiceNumber() {
+            return this.billType === 'estimation' ? this.nextEstimateNumber : this.nextGstNumber;
+        },
+
+        get isGstValid() {
+            if (!this.customerGst || this.customerGst.length === 0) return null;
+            return /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/i.test(this.customerGst);
+        },
 
         init() {
             this.updateTotals();
@@ -232,7 +272,11 @@ function invoiceSystem() {
 
         updateTotals() {
             this.subtotal = this.items.reduce((sum, item) => sum + (item.quantity * item.price), 0);
-            this.gstAmount = (this.subtotal * this.gstPercent) / 100;
+            if (this.billType === 'gst') {
+                this.gstAmount = (this.subtotal * this.gstPercent) / 100;
+            } else {
+                this.gstAmount = 0;
+            }
             this.total = this.subtotal + this.gstAmount;
         },
 

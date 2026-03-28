@@ -80,6 +80,12 @@ class User extends Authenticatable
         'branch_id',
         'phone',
         'address',
+        'mobile',
+        'vehicle_number',
+        'is_online',
+        'current_lat',
+        'current_lng',
+        'location_updated_at',
     ];
 
     /**

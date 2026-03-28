@@ -6,7 +6,8 @@
 .phpactor.json
 .phpunit.result.cache
 /.fleet
-/.idea
+# .idea is tracked — PHPStorm project config is committed
+# .idea/.gitignore controls which .idea files are excluded
 /.nova
 /.phpunit.cache
 /.vscode
@@ -22,3 +23,5 @@
 Homestead.json
 Homestead.yaml
 Thumbs.db
+# .phpstorm.meta.php is auto-generated for PhpStorm — optional to commit
+.phpstorm.meta.php

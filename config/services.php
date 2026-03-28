@@ -35,4 +35,16 @@ return [
         ],
     ],
 
+    // ─── WhatsApp (WATI.io) ───────────────────────────────────────────────────
+    'whatsapp' => [
+        'api_url'      => env('WHATSAPP_API_URL', ''),
+        'api_token'    => env('WHATSAPP_API_TOKEN', ''),
+        'phone_number' => env('WHATSAPP_PHONE_NUMBER', ''),
+    ],
+
+    // ─── Barcode ──────────────────────────────────────────────────────────────
+    'barcode' => [
+        'prefix' => env('BARCODE_PREFIX', 'TC'),
+    ],
+
 ];

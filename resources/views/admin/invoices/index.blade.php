@@ -13,6 +13,10 @@
                 <p class="text-gray-500 text-xs font-bold uppercase tracking-widest mt-1 italic">Financial settlement for all service operations</p>
             </div>
             <div class="flex gap-4">
+                <a href="{{ route('admin.invoice-settings.index') }}" class="px-6 py-2.5 rounded-xl border border-white/10 hover:bg-white/5 text-gray-300 hover:text-white font-black text-sm uppercase tracking-widest transition-all flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                    Print Editor
+                </a>
                 <a href="{{ route('admin.invoices.create') }}" class="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-sm uppercase tracking-widest transition-all shadow-lg shadow-indigo-500/20 flex items-center gap-2">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
                     Manual Invoice
@@ -59,7 +63,13 @@
             <div class="p-6 border-b border-white/5 flex justify-between items-center bg-white/[0.01]">
                 <h3 class="text-xs font-black text-gray-400 uppercase tracking-widest">Global Invoicing Log</h3>
                 <div class="flex gap-2">
-                    <input type="text" placeholder="Search invoices..." class="bg-white/5 border border-white/10 rounded-lg px-4 py-1.5 text-xs text-indigo-400 font-bold placeholder-gray-700 outline-none focus:border-indigo-500">
+                    <form action="{{ route('admin.invoices.index') }}" method="GET" class="flex gap-2">
+                        <input type="text" name="search" value="{{ request('search') }}" placeholder="Search invoices, name, mobile, GST..." class="bg-white/5 border border-white/10 rounded-lg px-4 py-1.5 text-xs text-indigo-400 font-bold placeholder-gray-700 outline-none focus:border-indigo-500 w-64">
+                        <button type="submit" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-3 py-1.5 rounded-lg text-xs transition-colors">Search</button>
+                        @if(request('search'))
+                            <a href="{{ route('admin.invoices.index') }}" class="bg-white/5 border border-white/10 hover:bg-white/10 text-gray-400 font-bold px-3 py-1.5 rounded-lg text-xs transition-colors">Clear</a>
+                        @endif
+                    </form>
                 </div>
             </div>
 
@@ -85,9 +95,12 @@
                                 </a>
                                 <span class="text-[10px] text-gray-500 font-bold uppercase mt-1">{{ $invoice->created_at->format('d M, Y') }}</span>
                             </td>
-                            <td class="p-5">
+                            <td class="p-5 flex flex-col items-start gap-1">
                                 <span class="inline-block px-3 py-1 rounded-md text-[9px] font-black uppercase tracking-widest {{ $invoice->billing_type === 'dealer' ? 'bg-indigo-500/10 text-indigo-400' : 'bg-sky-500/10 text-sky-400' }}">
                                     {{ $invoice->billing_type ?? 'RETAIL' }}
+                                </span>
+                                <span class="inline-block px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest {{ $invoice->bill_type === 'estimation' ? 'bg-sky-500/20 text-sky-300' : 'bg-emerald-500/20 text-emerald-300' }}">
+                                    {{ $invoice->bill_type === 'estimation' ? 'ESTIMATE' : 'TAX INVOICE' }}
                                 </span>
                             </td>
                             <td class="p-5">
@@ -100,7 +113,7 @@
                             </td>
                             <td class="p-5 text-right">
                                 <p class="text-sm font-black text-white italic tracking-tighter">₹{{ number_format($invoice->total, 2) }}</p>
-                                <p class="text-[9px] text-gray-600 font-bold uppercase">Incl. GST</p>
+                                <p class="text-[9px] text-gray-600 font-bold uppercase">{{ $invoice->bill_type === 'gst' ? 'Incl. GST' : 'Estimate' }}</p>
                             </td>
                             <td class="p-5 text-center">
                                 <span class="px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest italic
@@ -117,10 +130,21 @@
                             </td>
                             <td class="p-5 text-right">
                                 <div class="flex gap-2 justify-end">
-                                    <a href="{{ route('admin.invoices.show', $invoice->id) }}" class="p-2 bg-white/5 border border-white/10 rounded-lg text-gray-500 hover:text-white transition-all shadow-sm shadow-indigo-500/10">
+                                    @if($invoice->bill_type === 'estimation' && $invoice->payment_status !== 'converted')
+                                    <form action="{{ route('admin.invoices.convert', $invoice->id) }}" method="POST" class="inline">
+                                        @csrf
+                                        <button type="submit" onclick="return confirm('Convert this estimation to a Tax Invoice?')" class="p-2 bg-emerald-500/10 border border-emerald-500/20 rounded-lg text-emerald-400 hover:bg-emerald-500 hover:text-white transition-all shadow-sm shadow-emerald-500/10" title="Convert to Tax Invoice">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg>
+                                        </button>
+                                    </form>
+                                    @endif
+                                    <a href="{{ route('admin.invoices.show', $invoice->id) }}" class="p-2 bg-white/5 border border-white/10 rounded-lg text-gray-500 hover:text-white transition-all shadow-sm shadow-indigo-500/10" title="View">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                                     </a>
-                                    <a href="{{ route('admin.invoices.download', $invoice->id) }}" class="p-2 bg-indigo-500/10 border border-indigo-500/20 rounded-lg text-indigo-400 hover:bg-indigo-500 hover:text-white transition-all shadow-sm shadow-indigo-500/10">
+                                    <a href="{{ route('admin.invoices.print', $invoice->id) }}?auto_print=1" target="_blank" class="p-2 bg-white/5 border border-white/10 rounded-lg text-gray-400 hover:bg-white/20 hover:text-white transition-all shadow-sm" title="Print Document">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+                                    </a>
+                                    <a href="{{ route('admin.invoices.download', $invoice->id) }}" class="p-2 bg-indigo-500/10 border border-indigo-500/20 rounded-lg text-indigo-400 hover:bg-indigo-500 hover:text-white transition-all shadow-sm shadow-indigo-500/10" title="Download PDF">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
                                     </a>
                                 </div>

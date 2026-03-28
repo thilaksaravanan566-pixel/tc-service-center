@@ -14,6 +14,8 @@ use App\Models\Product;
 use Illuminate\Support\Facades\DB;
 use App\Models\Invoice;
 use App\Models\User;
+use App\Services\WhatsAppService;
+use App\Services\BarcodeService;
 
 
 class ServiceOrderController extends Controller
@@ -84,18 +86,18 @@ class ServiceOrderController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|max:255',
-            'mobile' => 'required|string|max:15',
-            'type' => 'required|in:laptop,desktop,printer,networking,cctv,router,switch,access_point,camera,nvr,dvr,monitor',
-            'brand' => 'required',
-            'model' => 'required',
+            'name'    => 'required|string|max:255',
+            'mobile'  => 'required|string|max:15',
+            'type'    => 'required|in:laptop,desktop,printer,networking,cctv,router,switch,access_point,camera,nvr,dvr,monitor',
+            'brand'   => 'required',
+            'model'   => 'required',
             'problem' => 'required',
         ]);
 
         /** @var Customer $customer */
         $customer = Customer::firstOrCreate(
             ['mobile' => $request->mobile],
-            ['name' => $request->name, 'email' => $request->email]
+            ['name'   => $request->name, 'email' => $request->email]
         );
 
         $photoPaths = [];
@@ -121,9 +123,14 @@ class ServiceOrderController extends Controller
             'damage_photos' => $photoPaths,
         ]);
 
-        ServiceOrder::create([
-            'tc_job_id'     => 'TC-' . date('Y') . '-' . strtoupper(substr(uniqid(), -4)),
-            'order_type'    => 'walkin',
+        // Generate tracked, sequential Job ID (TC-2026-000001)
+        /** @var BarcodeService $barcodeService */
+        $barcodeService = app(BarcodeService::class);
+        $jobId = $barcodeService->generateJobId();
+
+        $order = ServiceOrder::create([
+            'tc_job_id'     => $jobId,
+            'order_type'    => $request->order_type ?? 'walkin',
             'customer_id'   => $customer->id,
             'device_id'     => $device->id,
             'status'        => 'received',
@@ -133,37 +140,75 @@ class ServiceOrderController extends Controller
             'delivery_type' => 'take_away',
         ]);
 
-        return redirect()->route('admin.services.index')->with('success', 'Job Registered!');
+        // ─── WhatsApp: Notify customer of job receipt ─────────────
+        if (!empty($customer->mobile)) {
+            /** @var WhatsAppService $wa */
+            $wa = app(WhatsAppService::class);
+            $wa->notifyJobReceived($customer->mobile, $jobId, $customer->name);
+        }
+
+        return redirect()->route('admin.services.index')
+            ->with('success', "Job Registered! ID: {$jobId}");
     }
 
     public function update(Request $request, ServiceOrder $service)
     {
         $request->validate([
-            'status' => 'required|string',
-            'priority' => 'nullable|in:low,medium,high',
-            'estimated_cost' => 'nullable|numeric',
+            'status'           => 'required|string',
+            'priority'         => 'nullable|in:low,medium,high',
+            'estimated_cost'   => 'nullable|numeric',
             'engineer_comment' => 'nullable|string',
-            'is_paid' => 'nullable|boolean',
+            'is_paid'          => 'nullable|boolean',
         ]);
+
+        $previousStatus = $service->status;
 
         $service->update([
-            'status' => $request->status,
-            'priority' => $request->priority ?? $service->priority,
-            'estimated_cost' => $request->estimated_cost,
+            'status'           => $request->status,
+            'priority'         => $request->priority ?? $service->priority,
+            'estimated_cost'   => $request->estimated_cost,
             'engineer_comment' => $request->engineer_comment,
-            'is_paid' => $request->is_paid ?? false,
+            'is_paid'          => $request->is_paid ?? false,
         ]);
 
-        // Automatically Generate Invoice if Completed & Paid
+        $service->refresh();
+        $customer = $service->device?->customer ?? $service->customer;
+        /** @var WhatsAppService $wa */
+        $wa = app(WhatsAppService::class);
+
+        // ─── WhatsApp: Job ready for pickup ──────────────────────
+        if ($service->status === 'ready' && $previousStatus !== 'ready' && $customer?->mobile) {
+            $wa->sendMessage(
+                $customer->mobile,
+                "Dear {$customer->name}, your device (Job: {$service->tc_job_id}) is ready for pickup at Thambu Computers! For delivery queries, call us."
+            );
+        }
+
+        // ─── WhatsApp: Job completed & invoice generated ─────────
         if ($service->status === 'completed' && $service->is_paid) {
-            Invoice::firstOrCreate([
-                'service_order_id' => $service->id,
-            ], [
-                'invoice_number' => 'INV-' . date('Y') . '-' . str_pad($service->id, 5, '0', STR_PAD_LEFT),
-                'customer_id' => $service->customer_id,
-                'amount' => $service->estimated_cost ?? 0,
-                'status' => 'paid',
-            ]);
+            $invoice = Invoice::firstOrCreate(
+                ['service_order_id' => $service->id],
+                [
+                    'invoice_number' => 'INV-' . date('Y') . '-' . str_pad($service->id, 5, '0', STR_PAD_LEFT),
+                    'customer_id'    => $service->customer_id,
+                    'amount'         => $service->estimated_cost ?? 0,
+                    'status'         => 'paid',
+                ]
+            );
+
+            if ($customer?->mobile) {
+                $amount   = number_format((float) ($service->estimated_cost ?? 0), 2);
+                $invoiceUrl = route('admin.invoices.show', $invoice->id);
+                $wa->sendInvoiceLink($customer->mobile, $customer->name, $invoice->invoice_number, $invoiceUrl);
+            }
+        }
+
+        // ─── WhatsApp: Out for delivery ──────────────────────────
+        if ($service->status === 'out_for_delivery' && $previousStatus !== 'out_for_delivery' && $customer?->mobile) {
+            $wa->sendMessage(
+                $customer->mobile,
+                "Dear {$customer->name}, your device (Job: {$service->tc_job_id}) is out for delivery today! Track at: " . route('tracking.show', $service->tc_job_id)
+            );
         }
 
         return redirect()->back()->with('success', 'Service details updated successfully.');

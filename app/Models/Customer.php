@@ -68,6 +68,7 @@ class Customer extends Authenticatable
         'email',
         'address',
         'password',
+        'gst_number',
     ];
 
     protected $hidden = [

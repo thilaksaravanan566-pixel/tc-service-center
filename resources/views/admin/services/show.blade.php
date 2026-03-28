@@ -13,9 +13,15 @@
             <div class="flex gap-3">
                 @php $invoice = \App\Models\Invoice::where('service_order_id', $order->id)->first(); @endphp
                 @if($invoice)
-                    <a href="{{ route('admin.invoices.show', $invoice->id) }}" class="bg-blue-50 border border-blue-200 px-6 py-2 rounded-xl text-sm font-bold text-blue-600 hover:bg-blue-100 flex items-center">
-                        View Invoice
-                    </a>
+                    <div class="flex gap-2">
+                        <a href="{{ route('admin.invoices.show', $invoice->id) }}" class="bg-blue-50 border border-blue-200 px-6 py-2 rounded-xl text-sm font-bold text-blue-600 hover:bg-blue-100 flex items-center">
+                            View Invoice
+                        </a>
+                        <a href="{{ route('admin.invoices.print', $invoice->id) }}?auto_print=1" target="_blank" class="bg-emerald-50 border border-emerald-200 px-6 py-2 rounded-xl text-sm font-bold text-emerald-600 hover:bg-emerald-100 flex items-center shadow-sm shadow-emerald-100 gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+                            Print
+                        </a>
+                    </div>
                 @elseif($order->status === 'completed')
                     <a href="{{ route('admin.invoices.create', ['service_order_id' => $order->id]) }}" class="bg-green-600 px-6 py-2 rounded-xl text-sm font-bold text-white hover:bg-green-700 flex items-center shadow-lg shadow-green-100">
                         Generate Invoice

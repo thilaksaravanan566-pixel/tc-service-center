@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\DeviceController;
 use App\Http\Controllers\Admin\SparePartController;
 use App\Http\Controllers\Admin\InventoryController;
 use App\Http\Controllers\Admin\InvoiceController;
+use App\Http\Controllers\Admin\InvoiceSettingController;
 use App\Http\Controllers\Admin\PaymentController;
 use App\Http\Controllers\Admin\UsedLaptopController;
 use App\Http\Controllers\Admin\CustomerOrderController;
@@ -47,8 +48,24 @@ Route::get('/track', [TrackingController::class, 'index'])->name('tracking.index
 Route::get('/track/{job_id}', [TrackingController::class, 'show'])->name('tracking.show');
 Route::post('/track/{job_id}/specs', [TrackingController::class, 'updateDeviceSpecs'])->name('tracking.updateSpecs');
 
-// Delivery Partner Portal
-Route::get('/delivery-partner', [DeliveryTrackingController::class, 'deliveryDashboard'])->middleware('auth')->name('delivery.dashboard');
+/*
+|--------------------------------------------------------------------------
+| Delivery Partner Portal Routes  (/delivery/*)
+|--------------------------------------------------------------------------
+*/
+Route::group(['middleware' => ['auth', 'delivery_partner'], 'prefix' => 'delivery', 'as' => 'delivery.'], function () {
+    Route::get('/dashboard', [\App\Http\Controllers\Delivery\DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/orders/{id}', [\App\Http\Controllers\Delivery\DashboardController::class, 'show'])->name('show');
+    Route::post('/orders/{id}/status', [\App\Http\Controllers\Delivery\DashboardController::class, 'updateStatus'])->name('status');
+    Route::post('/orders/{id}/otp/send', [\App\Http\Controllers\Delivery\DashboardController::class, 'sendOtp'])->name('otp.send');
+    Route::post('/orders/{id}/otp/verify', [\App\Http\Controllers\Delivery\DashboardController::class, 'verifyOtp'])->name('otp.verify');
+});
+
+// Legacy single-route alias (preserved for backward compat)
+Route::get('/delivery-partner', [\App\Http\Controllers\Delivery\DashboardController::class, 'index'])
+    ->middleware(['auth', 'delivery_partner'])
+    ->name('delivery.legacy');
+
 
 /*
 |--------------------------------------------------------------------------
@@ -176,6 +193,12 @@ Route::group(['middleware' => ['auth', 'admin'], 'prefix' => 'admin', 'as' => 'a
     Route::post('/payments/process/{orderId}', [PaymentController::class, 'process'])->name('payments.process');
     Route::resource('invoices', InvoiceController::class);
     Route::get('/invoices/{invoice}/download', [InvoiceController::class, 'download'])->name('invoices.download');
+    Route::get('/invoices/{invoice}/print', [InvoiceController::class, 'print'])->name('invoices.print');
+    Route::post('/invoices/{invoice}/convert', [InvoiceController::class, 'convert'])->name('invoices.convert');
+    
+    // Invoice Settings
+    Route::get('/invoice-settings', [InvoiceSettingController::class, 'index'])->name('invoice-settings.index');
+    Route::post('/invoice-settings', [InvoiceSettingController::class, 'update'])->name('invoice-settings.update');
 
     // Billings & Purchase Orders
     Route::resource('billings', \App\Http\Controllers\Admin\BillingController::class);

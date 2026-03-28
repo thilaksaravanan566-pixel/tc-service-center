@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="PhpInterpretersPhpInfoCache">
+    <PhpInterpreterInfoCache>
+      <InterpreterInfo>
+        <KeyedValue>
+          <key>
+            <PhpInterpreter>
+              <option name="home" value="C:\xampp\php\php.exe" />
+              <option name="name" value="PHP 8.2 (XAMPP)" />
+            </PhpInterpreter>
+          </key>
+          <value>
+            <PhpInterpreterInfo>
+              <option name="phpVersion" value="8.2" />
+              <option name="phpBin" value="C:\xampp\php\php.exe" />
+            </PhpInterpreterInfo>
+          </value>
+        </KeyedValue>
+      </InterpreterInfo>
+    </PhpInterpreterInfoCache>
+  </component>
+</project>

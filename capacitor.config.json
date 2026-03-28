@@ -1,0 +1,9 @@
+{
+  "appId": "com.thambu.servicecenter",
+  "appName": "TC Service Center",
+  "webDir": "public",
+  "server": {
+    "url": "https://tc-service-center.web.app",
+    "cleartext": true
+  }
+}

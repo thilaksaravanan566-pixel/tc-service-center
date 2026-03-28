@@ -1,0 +1,11 @@
+# PHPStorm workspace-specific files (personal, not committed)
+workspace.xml
+tasks.xml
+usage.statistics.xml
+shelf/
+dictionaries/
+# Keep project-level config (PHP version, excluded folders, Laravel plugin)
+!modules.xml
+!tc-service-center.iml
+!php.xml
+!laravel-plugin.xml

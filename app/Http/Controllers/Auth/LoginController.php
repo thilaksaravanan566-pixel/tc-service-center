@@ -16,26 +16,29 @@ class LoginController extends Controller
     public function login(Request $request)
     {
         $credentials = $request->validate([
-            'email' => ['required', 'email'],
+            'email'    => ['required', 'email'],
             'password' => ['required'],
         ]);
 
-        if (Auth::attempt($credentials)) {
+        $remember = $request->boolean('remember');
+
+        if (Auth::attempt($credentials, $remember)) {
             $request->session()->regenerate();
 
-            if (Auth::user()->role === 'admin') {
-                return redirect()->intended('/admin/dashboard');
-            }
+            $role = Auth::user()->role;
 
-            if (Auth::user()->role === 'dealer') {
-                return redirect()->intended('/dealer/dashboard');
-            }
-            
-            return redirect()->intended('/technician/dashboard');
+            return match($role) {
+                'admin'            => redirect()->intended('/admin/dashboard'),
+                'dealer'           => redirect()->intended('/dealer/dashboard'),
+                'delivery_partner',
+                'delivery'         => redirect()->intended('/delivery-partner'),
+                'technician'       => redirect()->intended('/technician/dashboard'),
+                default            => redirect()->intended('/admin/dashboard'),
+            };
         }
 
         return back()->withErrors([
-            'email' => 'The provided credentials do not match our records.',
+            'email' => 'These credentials do not match our records.',
         ])->onlyInput('email');
     }
 
