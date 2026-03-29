@@ -12,10 +12,10 @@ class AdminSeeder extends Seeder
     {
         // Create the TC Admin
         User::updateOrCreate(
-            ['email' => 'admin@tc.com'],
+            ['email' => 'admin@thambucomputers.com'],
             [
                 'name' => 'TC Admin',
-                'password' => Hash::make('password123'),
+                'password' => Hash::make('Admin@1221#'),
                 'role' => 'admin',
             ]
         );
