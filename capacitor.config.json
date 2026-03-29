@@ -3,7 +3,7 @@
   "appName": "TC Service Center",
   "webDir": "public",
   "server": {
-    "url": "https://tc-service-center.web.app",
+    "url": "https://tc-service-center.onrender.com",
     "cleartext": true
   }
 }
