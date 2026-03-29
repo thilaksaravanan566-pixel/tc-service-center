@@ -12,20 +12,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // For MySQL, we need to change the enum. 
-        // For SQLite (testing), it might be different.
-        // Since Laravel 11+ uses DBAL or native Schema methods better, let's try clean approach.
-        
-        // However, updating ENUMs is notoriously tricky in some DBs. 
-        // Let's use raw SQL if it's MySQL, or just assume we can change it.
-        
-        try {
+        if (DB::getDriverName() === 'mysql') {
             DB::statement("ALTER TABLE users MODIFY COLUMN role ENUM('admin', 'technician', 'dealer', 'delivery') DEFAULT 'technician'");
-        } catch (\Exception $e) {
-            // Fallback for other drivers or if column doesn't exist yet as enum
-            Schema::table('users', function (Blueprint $table) {
-                $table->string('role')->default('technician')->change();
-            });
+        } elseif (DB::getDriverName() === 'pgsql') {
+            DB::statement("ALTER TABLE users ALTER COLUMN role TYPE VARCHAR(255)");
+            DB::statement("ALTER TABLE users ALTER COLUMN role SET DEFAULT 'technician'");
+        } else {
+            // SQLite or others
+            // Usually requires specific treatment, leaving it as is for fallback if needed.
         }
     }
 
@@ -34,12 +28,11 @@ return new class extends Migration
      */
     public function down(): void
     {
-        try {
+        if (DB::getDriverName() === 'mysql') {
             DB::statement("ALTER TABLE users MODIFY COLUMN role ENUM('admin', 'technician') DEFAULT 'technician'");
-        } catch (\Exception $e) {
-            Schema::table('users', function (Blueprint $table) {
-                $table->string('role')->default('technician')->change();
-            });
+        } elseif (DB::getDriverName() === 'pgsql') {
+            DB::statement("ALTER TABLE users ALTER COLUMN role TYPE VARCHAR(255)");
+            DB::statement("ALTER TABLE users ALTER COLUMN role SET DEFAULT 'technician'");
         }
     }
 };
