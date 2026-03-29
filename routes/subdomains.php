@@ -25,7 +25,7 @@ $domain = config('app.base_domain', '127.0.0.1');
 // ─────────────────────────────────────────────────────────────────────────────
 Route::domain('admin.' . $domain)
     ->middleware(['auth', 'admin'])
-    ->name('admin.')
+    ->name('admin.subdomain.')
     ->group(function () {
         Route::get('/', function () {
             return redirect()->route('admin.dashboard');
@@ -76,7 +76,7 @@ Route::domain('admin.' . $domain)
 // ─────────────────────────────────────────────────────────────────────────────
 Route::domain('dealer.' . $domain)
     ->middleware(['auth', 'dealer'])
-    ->name('dealer.')
+    ->name('dealer.subdomain.')
     ->group(function () {
         Route::get('/', function () {
             return redirect()->route('dealer.dashboard');
@@ -103,7 +103,7 @@ Route::domain('dealer.' . $domain)
 // CUSTOMER SUBDOMAIN → customer.thambucomputers.com
 // ─────────────────────────────────────────────────────────────────────────────
 Route::domain('customer.' . $domain)
-    ->name('customer.')
+    ->name('customer.subdomain.')
     ->group(function () {
         Route::get('/', function () {
             return redirect()->route('customer.dashboard');
