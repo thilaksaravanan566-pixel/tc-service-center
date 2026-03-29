@@ -21,11 +21,12 @@ RUN apk add --no-cache \
     git \
     curl \
     oniguruma-dev \
-    linux-headers
+    linux-headers \
+    postgresql-dev
 
 # Install PHP extensions
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install pdo_mysql mbstring zip exif pcntl gd
+    && docker-php-ext-install pdo_mysql pdo_pgsql pgsql mbstring zip exif pcntl gd
 
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
@@ -49,4 +50,4 @@ COPY deploy/nginx.conf /etc/nginx/http.d/default.conf
 EXPOSE 8080
 
 # Start Nginx and PHP-FPM
-CMD php-fpm -D && nginx -g "daemon off;"
+CMD php artisan migrate --force && php artisan config:cache && php artisan route:cache && php artisan view:cache && php-fpm -D && nginx -g "daemon off;"
