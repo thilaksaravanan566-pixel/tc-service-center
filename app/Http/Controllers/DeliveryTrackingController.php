@@ -50,12 +50,52 @@ class DeliveryTrackingController extends Controller
     public function customerTrackPage(Request $request, int $orderId)
     {
         $orderType = $request->query('type', 'product');
+        
+        $authorized = false;
+        if ($orderType === 'product') {
+            $order = \App\Models\ProductOrder::find($orderId);
+            if ($order && $order->customer_id === Auth::guard('customer')->id()) $authorized = true;
+        } elseif ($orderType === 'service') {
+            $order = \App\Models\ServiceOrder::find($orderId);
+            if ($order && $order->customer_id === Auth::guard('customer')->id()) $authorized = true;
+        }
+
+        if (!$authorized) abort(403, 'Unauthorized to view tracking for this manifest.');
+
         $location  = DeliveryLocation::where('order_type', $orderType)
                                      ->where('order_id', $orderId)
                                      ->with('deliveryPartner')
                                      ->first();
 
         return view('customer.tracking.live', compact('location', 'orderId', 'orderType'));
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // DEALER: Live tracking page for their delivery
+    // ─────────────────────────────────────────────────────────────
+
+    public function dealerTrackPage(Request $request, int $orderId)
+    {
+        $orderType = $request->query('type', 'product');
+        
+        $authorized = false;
+        $user = Auth::user();
+        if ($orderType === 'product') {
+            $order = \App\Models\DealerOrder::find($orderId);
+            if ($order && $order->dealer_id === $user->id) $authorized = true;
+        } elseif ($orderType === 'service') {
+            $order = \App\Models\ServiceOrder::find($orderId);
+            if ($order && $order->dealer_id === $user->id) $authorized = true;
+        }
+
+        if (!$authorized) abort(403, 'Unauthorized to view tracking for this manifest.');
+
+        $location  = DeliveryLocation::where('order_type', $orderType)
+                                     ->where('order_id', $orderId)
+                                     ->with('deliveryPartner')
+                                     ->first();
+
+        return view('dealer.tracking.live', compact('location', 'orderId', 'orderType'));
     }
 
     // ─────────────────────────────────────────────────────────────
@@ -76,6 +116,37 @@ class DeliveryTrackingController extends Controller
         if (!$location) {
             return response()->json(['found' => false]);
         }
+
+        // --- AUTHORIZATION CHECK ---
+        $authorized = false;
+        
+        if (Auth::guard('customer')->check()) {
+            if ($orderType === 'product') {
+                $order = \App\Models\ProductOrder::find($orderId);
+                if ($order && $order->customer_id === Auth::guard('customer')->id()) $authorized = true;
+            } elseif ($orderType === 'service') {
+                $order = \App\Models\ServiceOrder::find($orderId);
+                if ($order && $order->customer_id === Auth::guard('customer')->id()) $authorized = true;
+            }
+        } elseif (Auth::check()) {
+            $user = Auth::user();
+            if ($user->role === 'admin' || $user->role === 'delivery_partner') {
+                $authorized = true;
+            } elseif ($user->role === 'dealer') {
+                if ($orderType === 'product') {
+                    $order = \App\Models\DealerOrder::find($orderId);
+                    if ($order && $order->dealer_id === $user->id) $authorized = true;
+                } elseif ($orderType === 'service') {
+                    $order = \App\Models\ServiceOrder::find($orderId);
+                    if ($order && $order->dealer_id === $user->id) $authorized = true;
+                }
+            }
+        }
+
+        if (!$authorized) {
+            return response()->json(['found' => false, 'error' => 'Unauthorized tracing request.']);
+        }
+        // --- END AUTHORIZATION ---
 
         return response()->json([
             'found'          => true,

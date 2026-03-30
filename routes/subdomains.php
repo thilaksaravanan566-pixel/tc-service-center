@@ -95,6 +95,7 @@ Route::domain('dealer.' . $domain)
         Route::post('/shop', [App\Http\Controllers\Dealer\OrderController::class, 'store'])->name('orders.store');
         Route::get('/order-history', [App\Http\Controllers\Dealer\OrderController::class, 'history'])->name('orders.history');
         Route::get('/orders/{order}', [App\Http\Controllers\Dealer\OrderController::class, 'show'])->name('orders.show');
+        Route::get('/orders/{id}/track', [App\Http\Controllers\DeliveryTrackingController::class, 'dealerTrackPage'])->name('orders.track');
         Route::get('/inventory', [App\Http\Controllers\Dealer\InventoryController::class, 'index'])->name('inventory.index');
         Route::get('/inventory/logs', [App\Http\Controllers\Dealer\InventoryController::class, 'logs'])->name('inventory.logs');
     });

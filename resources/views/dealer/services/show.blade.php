@@ -18,6 +18,12 @@
                 WATCH INVOICE
              </a>
         @endif
+        @if(in_array($order->status, ['shipping', 'out_for_delivery', 'packing']))
+             <a href="{{ route('dealer.orders.track', $order->id) }}?type=service" class="btn btn-primary bg-blue-600 px-8 py-4 rounded-2xl shadow-xl shadow-blue-600/30 font-black text-white flex items-center gap-3 cursor-pointer hover:scale-105 active:scale-95 transition-all w-max whitespace-nowrap">
+                <i class="fas fa-map-marked-alt text-lg"></i>
+                LIVE VECTOR MAP
+             </a>
+        @endif
         <div id="status-badge" class="px-6 py-4 bg-indigo-600/20 border border-indigo-500/30 rounded-2xl text-indigo-400 font-black text-xs uppercase tracking-widest shadow-2xl">
             {{ strtoupper($order->status) }}
         </div>
