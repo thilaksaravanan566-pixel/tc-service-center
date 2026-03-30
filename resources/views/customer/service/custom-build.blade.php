@@ -58,9 +58,9 @@
                     <span class="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]"></span>
                     Acquisition Budget Flow (₹)
                 </label>
-                <div class="relative">
-                    <span class="absolute left-8 top-1/2 -translate-y-1/2 text-slate-800 font-black text-4xl group-focus-within/field:text-emerald-500 transition-colors">₹</span>
-                    <input type="number" name="budget" placeholder="50,000" class="super-input w-full pl-20 text-4xl py-10 font-black tracking-tighter bg-slate-950/80" required>
+                <div class="relative flex items-center">
+                    <span class="absolute left-4 text-slate-500 font-bold group-focus-within/field:text-emerald-500 transition-colors z-10" style="font-size: 0.95rem;">₹</span>
+                    <input type="number" name="budget" placeholder="50,000" class="super-input w-full font-bold" style="padding-left: 2.25rem !important;" required>
                 </div>
             </div>
             
