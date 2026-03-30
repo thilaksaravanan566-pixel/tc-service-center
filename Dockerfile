@@ -46,8 +46,12 @@ RUN chown -R www-data:www-data storage bootstrap/cache
 # Copy Nginx config (we'll create this next)
 COPY deploy/nginx.conf /etc/nginx/http.d/default.conf
 
+# Copy startup script
+COPY deploy/start.sh /usr/local/bin/start.sh
+RUN chmod +x /usr/local/bin/start.sh
+
 # Expose port
 EXPOSE 8080
 
-# Start Nginx and PHP-FPM
-CMD php artisan migrate --force && php artisan config:cache && php artisan route:cache && php artisan view:cache && php-fpm -D && nginx -g "daemon off;"
+# Use startup script for proper PHP-FPM → Nginx boot order
+CMD ["/usr/local/bin/start.sh"]
