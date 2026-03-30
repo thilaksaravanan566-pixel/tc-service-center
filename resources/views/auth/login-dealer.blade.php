@@ -65,7 +65,7 @@
             <div class="absolute inset-0 flex flex-col justify-end p-12 text-white z-10">
                 <div class="mb-4">
                     @if(config('custom.company_logo'))
-                        <img src="{{ asset('storage/' . config('custom.company_logo')) }}" alt="Logo" class="h-12 w-auto object-contain opacity-90 drop-shadow-lg mb-4">
+                        <img src="{{ asset('storage/' . config('custom.company_logo')) }}" onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name=TC&background=3b82f6&color=fff&size=100&rounded=true&bold=true';" alt="Logo" class="h-12 w-auto object-contain opacity-90 drop-shadow-lg mb-4">
                     @else
                         <div class="h-10 w-10 bg-[#3b82f6] rounded-xl flex items-center justify-center text-white font-black text-2xl mb-4 shadow-lg">TC</div>
                     @endif

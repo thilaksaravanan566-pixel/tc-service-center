@@ -20,7 +20,7 @@
         .floating-card { box-shadow: 0 40px 80px rgba(0,0,0,0.6); animation: floatIn 1s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; transform: translateY(40px); }
         @keyframes floatIn { to { opacity: 1; transform: translateY(0); } }
         .illustration-panel {
-            background: url('https://images.unsplash.com/photo-1615800098779-1be32e60ccc3?auto=format&fit=crop&q=80&w=1000') center right / cover no-repeat;
+            background: url('https://images.unsplash.com/photo-1586528116311-ad8ed7a64a64?auto=format&fit=crop&q=80&w=1000') center right / cover no-repeat;
             position: relative;
         }
         .illustration-overlay { background: linear-gradient(180deg, rgba(124, 45, 18, 0.4) 0%, rgba(124, 45, 18, 0.95) 100%); position: absolute; inset: 0; }
@@ -47,7 +47,7 @@
             <div class="absolute inset-0 flex flex-col justify-end p-12 text-white z-10">
                 <div class="mb-4">
                     @if(config('custom.company_logo'))
-                        <img src="{{ asset('storage/' . config('custom.company_logo')) }}" alt="Logo" class="h-12 w-auto object-contain opacity-90 drop-shadow-lg mb-4">
+                        <img src="{{ asset('storage/' . config('custom.company_logo')) }}" onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name=TC&background=f97316&color=fff&size=100&rounded=true&bold=true';" alt="Logo" class="h-12 w-auto object-contain opacity-90 drop-shadow-lg mb-4">
                     @else
                         <div class="h-10 w-10 bg-[#f97316] rounded-xl flex items-center justify-center text-white font-black text-2xl mb-4 shadow-lg">TC</div>
                     @endif
