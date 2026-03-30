@@ -27,7 +27,8 @@ class SparePartController extends Controller
      */
     public function create()
     {
-        return view('admin.stock.create');
+        $categories = \App\Models\PartCategory::active()->orderBy('name')->get();
+        return view('admin.stock.create', compact('categories'));
     }
 
     /**
@@ -59,8 +60,8 @@ class SparePartController extends Controller
      */
     public function edit(SparePart $part)
     {
-        // 'part' matches the resource route parameter
-        return view('admin.stock.edit', ['sparePart' => $part]);
+        $categories = \App\Models\PartCategory::active()->orderBy('name')->get();
+        return view('admin.stock.edit', ['sparePart' => $part, 'categories' => $categories]);
     }
 
     /**

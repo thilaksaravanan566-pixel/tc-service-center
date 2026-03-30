@@ -37,31 +37,16 @@
                         <div>
                             <label class="block text-[10px] font-black tracking-widest text-red-600 uppercase mb-2">Category</label>
                             <select name="category" required class="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-red-100 focus:border-red-400 transition-all font-bold text-slate-800 cursor-pointer">
-                                <option value="" disabled selected>Select Category</option>
-                                <option value="RAM" {{ old('category') == 'RAM' ? 'selected' : '' }}>RAM Memory</option>
-                                <option value="Storage" {{ old('category') == 'Storage' ? 'selected' : '' }}>Storage (SSD/HDD)</option>
-                                <option value="Display" {{ old('category') == 'Display' ? 'selected' : '' }}>Display / Screen</option>
-                                <option value="Battery" {{ old('category') == 'Battery' ? 'selected' : '' }}>Battery</option>
-                                <option value="Keyboard" {{ old('category') == 'Keyboard' ? 'selected' : '' }}>Keyboard</option>
-                                <option value="Motherboard" {{ old('category') == 'Motherboard' ? 'selected' : '' }}>Motherboard / Logic Board</option>
-                                <option value="Processor" {{ old('category') == 'Processor' ? 'selected' : '' }}>Processor / CPU</option>
-                                <option value="Adapter" {{ old('category') == 'Adapter' ? 'selected' : '' }}>Charger / Adapter</option>
-                                <option value="Cables" {{ old('category') == 'Cables' ? 'selected' : '' }}>Cables & Connectors</option>
-                                <option value="Monitor" {{ old('category') == 'Monitor' ? 'selected' : '' }}>Monitor</option>
-                                <option value="Desktop Cabinet" {{ old('category') == 'Desktop Cabinet' ? 'selected' : '' }}>Desktop Cabinet</option>
-                                <option value="CCTV Camera" {{ old('category') == 'CCTV Camera' ? 'selected' : '' }}>CCTV Camera</option>
-                                <option value="IC" {{ old('category') == 'IC' ? 'selected' : '' }}>IC</option>
-                                <option value="IO IC" {{ old('category') == 'IO IC' ? 'selected' : '' }}>IO IC</option>
-                                <option value="GPU" {{ old('category') == 'GPU' ? 'selected' : '' }}>GPU / Graphics Card</option>
-                                <option value="Thermal Paste" {{ old('category') == 'Thermal Paste' ? 'selected' : '' }}>Thermal Paste</option>
-                                <option value="Webcams" {{ old('category') == 'Webcams' ? 'selected' : '' }}>Webcams</option>
-                                <option value="Speakers" {{ old('category') == 'Speakers' ? 'selected' : '' }}>Speakers</option>
-                                <option value="Panels" {{ old('category') == 'Panels' ? 'selected' : '' }}>A, B, C Panels</option>
-                                <option value="Mouse" {{ old('category') == 'Mouse' ? 'selected' : '' }}>Mouse</option>
-                                <option value="Wireless KB&Mouse" {{ old('category') == 'Wireless KB&Mouse' ? 'selected' : '' }}>Wireless KB & Mouse</option>
-                                <option value="CMOS Battery" {{ old('category') == 'CMOS Battery' ? 'selected' : '' }}>CMOS Battery</option>
-                                <option value="Other" {{ old('category') == 'Other' ? 'selected' : '' }}>Other Component</option>
+                                <option value="" disabled selected>Select a category...</option>
+                                @foreach($categories as $cat)
+                                    <option class="text-slate-900 bg-white" value="{{ $cat->name }}" {{ old('category') == $cat->name ? 'selected' : '' }}>
+                                        {{ $cat->name }}
+                                    </option>
+                                @endforeach
                             </select>
+                            <a href="{{ route('admin.part-categories.index') }}" class="inline-block mt-2 text-[10px] uppercase font-black tracking-widest text-blue-500 hover:text-blue-700 transition-colors">
+                                + Manage Categories
+                            </a>
                         </div>
 
                         <div>

@@ -177,6 +177,7 @@ Route::group(['middleware' => ['auth', 'admin'], 'prefix' => 'admin', 'as' => 'a
     // Device & Spare Parts Management
     Route::resource('devices', DeviceController::class);
     Route::resource('parts', SparePartController::class);
+    Route::resource('part-categories', \App\Http\Controllers\Admin\PartCategoryController::class)->except(['create', 'show', 'edit']);
     Route::resource('laptops', UsedLaptopController::class);
     
     // Custom View Endpoints
