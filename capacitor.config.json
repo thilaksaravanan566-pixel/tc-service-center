@@ -3,7 +3,7 @@
   "appName": "TC Service Center",
   "webDir": "public",
   "server": {
-    "url": "https://tc-service-center.onrender.com",
+    "url": "https://app.thambucomputers.com",
     "cleartext": true
   }
 }

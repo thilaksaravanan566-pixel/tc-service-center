@@ -13,6 +13,14 @@ services:
         value: production
       - key: APP_DEBUG
         value: false
+      - key: APP_URL
+        value: "https://app.thambucomputers.com"
+      - key: APP_BASE_DOMAIN
+        value: "thambucomputers.com"
+      - key: SESSION_DOMAIN
+        value: ".thambucomputers.com"
+      - key: SANCTUM_STATEFUL_DOMAINS
+        value: "app.thambucomputers.com,thambucomputers.com"
       - key: APP_KEY
         value: "base64:B9lc7FOvpMn/jisyUXz8jiX7SvNqiKlcx5B7wFV7tm0="
       - key: CACHE_DRIVER
