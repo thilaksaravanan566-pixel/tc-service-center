@@ -129,13 +129,28 @@
         {{-- Right Column --}}
         <div style="display:flex;flex-direction:column;gap:16px">
 
-            {{-- Tech Lab Card --}}
-            <div class="card" style="padding:24px;background:linear-gradient(135deg,#0ea5e9 0%,#0369a1 100%);border:none">
-                <div style="font-size:2rem;margin-bottom:12px">🧪</div>
-                <h3 style="font-size:1rem;font-weight:700;color:#fff;margin-bottom:6px">Thambu Tech Lab</h3>
-                <p style="font-size:0.8rem;color:rgba(255,255,255,0.7);line-height:1.5;margin-bottom:16px">Interactive hardware simulations, PC building games & repair training.</p>
-                <a href="{{ route('customer.tech-lab.dashboard') }}" class="btn" style="background:#fff;color:var(--primary-dark);width:100%;justify-content:center;font-size:0.8rem">Enter Lab →</a>
-            </div>
+            {{-- Advertisement Card --}}
+            @if(isset($offers) && $offers->count() > 0)
+                @php $featuredOffer = $offers->first(); @endphp
+                <div class="card" style="padding:24px;background:linear-gradient(135deg,#8b5cf6 0%,#6d28d9 100%);border:none;position:relative;overflow:hidden">
+                    @if($featuredOffer->image_path)
+                    <div style="position:absolute;top:0;left:0;right:0;bottom:0;opacity:0.25;background:url('{{ asset('storage/' . $featuredOffer->image_path) }}') center/cover;mix-blend-mode:overlay"></div>
+                    @endif
+                    <div style="position:relative;z-index:10">
+                        <div style="font-size:2rem;margin-bottom:12px">✨</div>
+                        <h3 style="font-size:1.1rem;font-weight:800;color:#fff;margin-bottom:6px text-shadow-sm">{{ $featuredOffer->title }}</h3>
+                        <p style="font-size:0.85rem;color:rgba(255,255,255,0.9);line-height:1.4;margin-bottom:16px">{{ Str::limit($featuredOffer->description, 80) }}</p>
+                        @if($featuredOffer->discount_code)
+                        <div style="background:rgba(255,255,255,0.15);padding:8px;border-radius:6px;text-align:center;font-family:'Courier New', monospace;font-weight:900;color:#fff;margin-bottom:16px;letter-spacing:2px;border:1px dashed rgba(255,255,255,0.4)">
+                            {{ $featuredOffer->discount_code }}
+                        </div>
+                        @else
+                        <div style="height:16px"></div>
+                        @endif
+                        <a href="{{ route('shop.index') }}" class="btn" style="background:#fff;color:#6d28d9;width:100%;justify-content:center;font-size:0.85rem;font-weight:700;text-transform:uppercase;letter-spacing:1px">Claim Offer →</a>
+                    </div>
+                </div>
+            @endif
 
             {{-- Quick Links --}}
             <div class="card" style="padding:20px">

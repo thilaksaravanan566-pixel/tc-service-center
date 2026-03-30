@@ -124,6 +124,10 @@ Route::group(['prefix' => 'customer', 'as' => 'customer.'], function () {
         // ⚙️ Customer Settings Profile
         Route::view('/settings', 'customer.settings.index')->name('settings');
 
+        // 🤖 AI Chat Bot
+        Route::get('/chat', [\App\Http\Controllers\Customer\ChatController::class, 'index'])->name('chat');
+        Route::post('/chat', [\App\Http\Controllers\Customer\ChatController::class, 'message'])->name('chat.message');
+
         // 🎮 Tech Learning & Hardware Builder Game
         Route::get('/learning', [\App\Http\Controllers\Customer\LearningController::class, 'index'])->name('learning.index');
         Route::get('/learning/hardware-builder', [\App\Http\Controllers\Customer\LearningController::class, 'game'])->name('learning.hardware-builder');
