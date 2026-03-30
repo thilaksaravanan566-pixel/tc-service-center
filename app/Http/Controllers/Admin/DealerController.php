@@ -29,28 +29,33 @@ class DealerController extends Controller
             'password' => 'required|string|min:8',
         ]);
 
-        \Illuminate\Support\Facades\DB::transaction(function () use ($request) {
-            /** @var \App\Models\User $user */
-            $user = \App\Models\User::create([
-                'name' => $request->name,
-                'email' => $request->email,
-                'password' => \Illuminate\Support\Facades\Hash::make($request->password),
-                'role' => 'dealer',
-                'phone' => $request->phone,
-                'address' => $request->address,
-            ]);
+        try {
+            \Illuminate\Support\Facades\DB::transaction(function () use ($request) {
+                /** @var \App\Models\User $user */
+                $user = \App\Models\User::create([
+                    'name' => $request->name,
+                    'email' => $request->email,
+                    'password' => \Illuminate\Support\Facades\Hash::make($request->password),
+                    'role' => 'dealer',
+                    'phone' => $request->phone,
+                    'address' => $request->address,
+                    'salary' => 0,
+                ]);
 
-            \App\Models\Dealer::create([
-                'user_id' => $user->id,
-                'business_name' => $request->business_name,
-                'phone' => $request->phone,
-                'address' => $request->address,
-                'gst_number' => $request->gst_number,
-                'status' => 'active',
-            ]);
-        });
+                \App\Models\Dealer::create([
+                    'user_id' => $user->id,
+                    'business_name' => $request->business_name,
+                    'phone' => $request->phone,
+                    'address' => $request->address,
+                    'gst_number' => $request->gst_number,
+                    'status' => 'active',
+                ]);
+            });
 
-        return redirect()->route('admin.dealers.index')->with('success', 'Dealer created successfully.');
+            return redirect()->route('admin.dealers.index')->with('success', 'Dealer created successfully.');
+        } catch (\Throwable $e) {
+            return back()->withInput()->with('error', 'Error creating dealer: ' . $e->getMessage());
+        }
     }
 
     public function show(\App\Models\Dealer $dealer)
@@ -76,27 +81,31 @@ class DealerController extends Controller
             'status' => 'required|in:active,inactive',
         ]);
 
-        \Illuminate\Support\Facades\DB::transaction(function () use ($request, $dealer) {
-            $user = $dealer->user;
-            $user->name = $request->name;
-            $user->email = $request->email;
-            $user->phone = $request->phone;
-            $user->address = $request->address;
-            if ($request->filled('password')) {
-                $user->password = \Illuminate\Support\Facades\Hash::make($request->password);
-            }
-            $user->save();
+        try {
+            \Illuminate\Support\Facades\DB::transaction(function () use ($request, $dealer) {
+                $user = $dealer->user;
+                $user->name = $request->name;
+                $user->email = $request->email;
+                $user->phone = $request->phone;
+                $user->address = $request->address;
+                if ($request->filled('password')) {
+                    $user->password = \Illuminate\Support\Facades\Hash::make($request->password);
+                }
+                $user->save();
 
-            $dealer->update([
-                'business_name' => $request->business_name,
-                'phone' => $request->phone,
-                'address' => $request->address,
-                'gst_number' => $request->gst_number,
-                'status' => $request->status,
-            ]);
-        });
+                $dealer->update([
+                    'business_name' => $request->business_name,
+                    'phone' => $request->phone,
+                    'address' => $request->address,
+                    'gst_number' => $request->gst_number,
+                    'status' => $request->status,
+                ]);
+            });
 
-        return redirect()->route('admin.dealers.index')->with('success', 'Dealer updated successfully.');
+            return redirect()->route('admin.dealers.index')->with('success', 'Dealer updated successfully.');
+        } catch (\Throwable $e) {
+            return back()->withInput()->with('error', 'Error updating dealer: ' . $e->getMessage());
+        }
     }
 
     public function destroy(\App\Models\Dealer $dealer)
