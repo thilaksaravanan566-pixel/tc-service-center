@@ -130,11 +130,19 @@
                     </div>
                 </div>
 
-                <div>
-                    <label for="reg-email">Email Address</label>
-                    <input id="reg-email" type="email" name="email" value="{{ old('email') }}"
-                           required placeholder="you@example.com"
-                           class="auth-input">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label for="reg-email">Email Address</label>
+                        <input id="reg-email" type="email" name="email" value="{{ old('email') }}"
+                               required placeholder="you@example.com"
+                               class="auth-input">
+                    </div>
+                    <div>
+                        <label for="reg-mobile">Mobile Number</label>
+                        <input id="reg-mobile" type="text" name="mobile" value="{{ old('mobile') }}"
+                               required placeholder="9876543210"
+                               class="auth-input">
+                    </div>
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">

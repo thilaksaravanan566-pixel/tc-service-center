@@ -42,6 +42,7 @@ class AuthController extends Controller
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'username' => ['required', 'string', 'max:255', 'unique:customers'],
+            'mobile' => ['required', 'string', 'max:15', 'unique:customers'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:customers'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
         ]);
@@ -49,7 +50,7 @@ class AuthController extends Controller
         $customer = Customer::create([
             'name' => $request->name,
             'username' => $request->username,
-            'mobile' => $request->mobile ?? '0000000000', // Default fallback if not provided
+            'mobile' => $request->mobile,
             'email' => $request->email,
             'password' => Hash::make($request->password),
         ]);

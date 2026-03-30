@@ -47,7 +47,12 @@ return Application::configure(basePath: dirname(__DIR__))
             '/delivery/login',  // delivery partner login
         ]);
 
-        $middleware->redirectGuestsTo('/login');
+        $middleware->redirectGuestsTo(function ($request) {
+            if ($request->is('customer/*') || $request->is('customer')) {
+                return route('customer.login');
+            }
+            return '/login';
+        });
 
         $middleware->redirectUsersTo(function (\Illuminate\Http\Request $request) {
             $user = $request->user();

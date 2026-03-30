@@ -102,7 +102,7 @@
             </div>
         </div>
 
-        <div class="card" style="padding:28px;margin-bottom:20px" x-data="{ deliveryType: 'take_away' }">
+        <div class="card" style="padding:28px;margin-bottom:20px" x-data="{ deliveryType: 'take_away', lat: '', lng: '', address: '{{ auth('customer')->user()->address ?? '' }}' }">
             <h3 style="font-size:0.875rem;font-weight:700;color:var(--text-primary);margin-bottom:18px;display:flex;align-items:center;gap:8px">
                 <span style="width:20px;height:20px;border-radius:50%;background:var(--primary);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:0.65rem;font-weight:700;flex-shrink:0">4</span>
                 Service Method
@@ -128,9 +128,32 @@
                 </label>
             </div>
             <div x-show="deliveryType === 'delivery'" x-cloak x-transition>
-                <label style="font-size:0.72rem;font-weight:600;color:var(--text-muted);display:block;margin-bottom:5px">Pickup Address</label>
-                <textarea name="delivery_address" rows="2" class="super-input" style="resize:none"
-                          placeholder="Enter your full address for pickup…">{{ auth('customer')->user()->address ?? '' }}</textarea>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label style="font-size:0.72rem;font-weight:600;color:var(--text-muted);display:block;margin-bottom:5px">Pickup Address</label>
+                        <textarea name="delivery_address" rows="3" class="super-input" style="resize:none" x-model="address"
+                                  placeholder="Enter your full address for pickup…"></textarea>
+
+                        <div style="margin-top:12px">
+                            <label style="font-size:0.72rem;font-weight:600;color:var(--text-muted);display:block;margin-bottom:5px">Mobile for Pickup</label>
+                            <input type="text" name="delivery_mobile" class="super-input" value="{{ auth('customer')->user()->mobile ?? '' }}" placeholder="Pickup mobile number">
+                        </div>
+
+                        <input type="hidden" name="delivery_location_url" id="location-url" :value="'https://www.google.com/maps?q=' + lat + ',' + lng">
+                    </div>
+                    <div>
+                        <label style="font-size:0.72rem;font-weight:600;color:var(--text-muted);display:block;margin-bottom:5px">
+                            Pin Your Location <span style="font-weight:normal">(Optional but recommended)</span>
+                        </label>
+                        <div id="pin-map" 
+                             x-init="$nextTick(() => { mapInit() })"
+                             style="height:140px;border-radius:var(--radius-sm);border:1px solid var(--border);overflow:hidden;background:#f8fafc">
+                        </div>
+                        <p style="font-size:0.65rem;color:var(--text-muted);margin-top:5px">
+                            Click/tap on map to set your precise pickup location.
+                        </p>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -142,6 +165,77 @@
         </p>
     </form>
 </div>
+
+@push('head')
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+@endpush
+
+@push('scripts')
+<script>
+let marker = null;
+let map = null;
+
+function mapInit() {
+    if (map) return;
+    
+    // Default: Coimbatore (common for this client) or user's current if available
+    const defaultPos = [11.0168, 76.9558];
+    
+    map = L.map('pin-map').setView(defaultPos, 13);
+    
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19
+    }).addTo(map);
+
+    // Try to get current location
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition((position) => {
+            const pos = [position.coords.latitude, position.coords.longitude];
+            map.setView(pos, 15);
+            setMarker(pos);
+        });
+    }
+
+    map.on('click', function(e) {
+        setMarker([e.latlng.lat, e.latlng.lng]);
+    });
+}
+
+function setMarker(pos) {
+    if (marker) {
+        marker.setLatLng(pos);
+    } else {
+        marker = L.marker(pos, {draggable: true}).addTo(map);
+        marker.on('dragend', function(e) {
+            updateCoords(marker.getLatLng());
+        });
+    }
+    updateCoords({lat: pos[0], lng: pos[1]});
+}
+
+function updateCoords(latlng) {
+    // Update Alpine data or hidden inputs manually
+    const alpineEl = document.querySelector('[x-data]');
+    if (alpineEl && alpineEl.__x) {
+        alpineEl.__x.$data.lat = latlng.lat.toFixed(6);
+        alpineEl.__x.$data.lng = latlng.lng.toFixed(6);
+    } else {
+        // Fallback or for non-initialized state
+        document.getElementById('location-url').value = `https://www.google.com/maps?q=${latlng.lat.toFixed(6)},${latlng.lng.toFixed(6)}`;
+    }
+}
+
+// Special case: Refresh map size when container becomes visible
+window.addEventListener('resize', () => {
+    if (map) map.invalidateSize();
+});
+
+// Watch for deliveryType change to refresh map
+document.addEventListener('alpine:init', () => {
+    // Already handled by x-init
+});
+</script>
 
 <script>
 function updatePhotoCount(input) {

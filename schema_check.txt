@@ -1,0 +1,5 @@
+USERS:
+id, name, email, mobile, phone, address, vehicle_number, password, role, remember_token, created_at, updated_at, salary, biometric_id, branch_id, current_lat, current_lng, location_updated_at, is_online
+
+DEALERS:
+id, user_id, business_name, phone, address, gst_number, status, created_at, updated_at
