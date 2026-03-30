@@ -276,9 +276,9 @@
                     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-bottom:24px">
                         @php
                         $company = \App\Models\CompanyProfile::first();
-                        $phone   = $company?->phone   ?: Setting::get('support_phone', '+91 98765 43210');
-                        $email   = $company?->email   ?: Setting::get('support_email', 'support@thambu.in');
-                        $address = $company?->address ?: Setting::get('company_address', 'Chennai, TN');
+                        $phone   = $company?->phone   ?: \App\Models\Setting::get('support_phone', '+91 98765 43210');
+                        $email   = $company?->email   ?: \App\Models\Setting::get('support_email', 'support@thambu.in');
+                        $address = $company?->address ?: \App\Models\Setting::get('company_address', 'Chennai, TN');
 
                         $contacts = [
                             ['icon' => '📞', 'title' => 'Call Us',       'val' => $phone, 'sub' => 'Mon–Sat · 9AM–7PM'],
