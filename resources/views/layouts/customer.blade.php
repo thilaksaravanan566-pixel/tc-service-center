@@ -620,53 +620,138 @@
         </footer>
     </main>
 
-    {{-- ══ AI WIDGET ══ --}}
-    <div x-data="{ open: false }" class="fixed bottom-6 right-6 z-[100]">
-        <button @click="open = !open" id="ai-widget-btn"
-                class="w-12 h-12 rounded-xl flex items-center justify-center text-white transition-all duration-200"
-                style="background:var(--primary);box-shadow:var(--shadow-lg)"
-                :style="open ? 'background:var(--primary-hover)' : ''">
-            <svg x-show="!open" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg>
-            <svg x-show="open" x-cloak class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+    {{-- ══ FLOATING AI CHATBOT WIDGET ══ --}}
+    @php $chatCustomerName = auth('customer')->user()->name ?? 'Customer'; @endphp
+    <div x-data="{
+        open: false,
+        messages: [{ type: 'bot', text: 'Hi {{ $chatCustomerName }}! 👋 How can I help you today? Ask me about your repairs, orders, or services.', time: '' }],
+        newMessage: '',
+        isTyping: false,
+        sendMessage() {
+            if (!this.newMessage.trim() || this.isTyping) return;
+            const text = this.newMessage.trim();
+            this.newMessage = '';
+            const now = new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+            this.messages.push({ type: 'user', text, time: now });
+            this.$nextTick(() => this.scroll());
+            this.isTyping = true;
+            const self = this;
+            fetch('{{ route('customer.chat.message') }}', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+                body: JSON.stringify({ message: text })
+            })
+            .then(r => r.json())
+            .then(d => {
+                self.isTyping = false;
+                self.messages.push({ type: 'bot', text: d.reply, time: new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}) });
+                self.$nextTick(() => self.scroll());
+            })
+            .catch(() => {
+                self.isTyping = false;
+                self.messages.push({ type: 'bot', text: 'Sorry, I am unable to connect right now. Please try again.', time: '' });
+                self.$nextTick(() => self.scroll());
+            });
+        },
+        scroll() {
+            const el = document.getElementById('widget-chat-window');
+            if (el) el.scrollTop = el.scrollHeight;
+        }
+    }" class="fixed bottom-6 right-6 z-[200]" style="position:fixed;bottom:24px;right:24px;z-index:200">
+
+        {{-- Toggle Button --}}
+        <button @click="open = !open" id="ai-chat-toggle"
+                style="width:54px;height:54px;border-radius:50%;background:linear-gradient(135deg,#4f46e5,#7c3aed);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 24px rgba(79,70,229,0.4);transition:all 0.2s;position:relative"
+                onmouseover="this.style.transform='scale(1.08)'" onmouseout="this.style.transform='scale(1)'">
+            {{-- Chat icon --}}
+            <svg x-show="!open" style="width:26px;height:26px;color:#fff" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/>
+            </svg>
+            {{-- Close icon --}}
+            <svg x-show="open" x-cloak style="width:22px;height:22px;color:#fff" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+            {{-- Pulse ring --}}
+            <span x-show="!open" style="position:absolute;top:-3px;right:-3px;width:14px;height:14px;border-radius:50%;background:#22c55e;border:2px solid #fff;animation:pulse-dot 2s infinite"></span>
         </button>
 
+        {{-- Chat Window --}}
         <div x-show="open" x-cloak
-             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter="transition ease-out duration-250"
              x-transition:enter-start="opacity-0 translate-y-4 scale-95"
              x-transition:enter-end="opacity-100 translate-y-0 scale-100"
-             class="card absolute right-0 flex flex-col overflow-hidden"
-             style="width:320px;height:420px;bottom:60px;border-radius:var(--radius-xl);">
+             x-transition:leave="transition ease-in duration-150"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0 scale-95"
+             style="position:absolute;bottom:66px;right:0;width:340px;height:480px;background:#fff;border-radius:18px;box-shadow:0 20px 60px rgba(0,0,0,0.15);display:flex;flex-direction:column;overflow:hidden;border:1px solid rgba(79,70,229,0.12)">
 
-            <div style="padding:16px;display:flex;align-items:center;gap:12px;background:var(--primary);border-radius:var(--radius-xl) var(--radius-xl) 0 0">
-                <div style="width:38px;height:38px;border-radius:var(--radius-sm);background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;font-size:1.1rem">🤖</div>
-                <div>
-                    <div style="font-size:0.875rem;font-weight:600;color:#fff">AI Assistant</div>
-                    <div style="font-size:0.7rem;color:rgba(255,255,255,0.7);display:flex;align-items:center;gap:6px">
-                        <span style="width:6px;height:6px;border-radius:50%;background:#4ade80;display:inline-block"></span>
+            {{-- Header --}}
+            <div style="padding:14px 18px;background:linear-gradient(135deg,#4f46e5,#7c3aed);display:flex;align-items:center;gap:12px">
+                <div style="width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0">🤖</div>
+                <div style="flex:1">
+                    <div style="font-size:0.875rem;font-weight:700;color:#fff">Thambu AI</div>
+                    <div style="font-size:0.7rem;color:rgba(255,255,255,0.75);display:flex;align-items:center;gap:5px">
+                        <span style="width:6px;height:6px;border-radius:50%;background:#4ade80;display:inline-block;animation:pulse-dot 1.5s infinite"></span>
                         Online · Ready to help
                     </div>
                 </div>
+                <a href="{{ route('customer.chat') }}" style="font-size:0.7rem;color:rgba(255,255,255,0.75);text-decoration:none;background:rgba(255,255,255,0.15);padding:4px 10px;border-radius:20px" onmouseover="this.style.background='rgba(255,255,255,0.25)'" onmouseout="this.style.background='rgba(255,255,255,0.15)'">Full Screen</a>
             </div>
 
-            <div style="flex:1;padding:16px;overflow-y:auto;background:var(--primary-50)">
-                <div style="display:flex;gap:10px;align-items:flex-start">
-                    <div style="width:30px;height:30px;border-radius:var(--radius-sm);background:var(--primary-100);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:0.9rem">🤖</div>
-                    <div style="background:#fff;border:1px solid var(--border);border-radius:0 var(--radius-md) var(--radius-md) var(--radius-md);padding:10px 14px;max-width:85%">
-                        <p style="font-size:0.8rem;color:var(--text-secondary);line-height:1.5">Hi! How can I help you with your service or order today?</p>
+            {{-- Messages --}}
+            <div id="widget-chat-window" style="flex:1;overflow-y:auto;padding:14px;background:#f8fafc;display:flex;flex-direction:column;gap:10px">
+                <template x-for="(msg, i) in messages" :key="i">
+                    <div :style="msg.type === 'user' ? 'display:flex;justify-content:flex-end' : 'display:flex;justify-content:flex-start;gap:8px;align-items:flex-end'">
+                        <template x-if="msg.type === 'bot'">
+                            <div style="width:26px;height:26px;border-radius:50%;background:#ede9fe;display:flex;align-items:center;justify-content:center;font-size:0.8rem;flex-shrink:0">🤖</div>
+                        </template>
+                        <div>
+                            <div :style="msg.type === 'user'
+                                ? 'background:linear-gradient(135deg,#4f46e5,#6d28d9);color:#fff;border-radius:18px 18px 4px 18px;padding:9px 14px;font-size:0.8rem;line-height:1.45;max-width:220px;word-wrap:break-word'
+                                : 'background:#fff;color:#1e293b;border:1px solid #e2e8f0;border-radius:18px 18px 18px 4px;padding:9px 14px;font-size:0.8rem;line-height:1.45;max-width:240px;word-wrap:break-word;box-shadow:0 1px 3px rgba(0,0,0,0.05)'"
+                                x-text="msg.text"></div>
+                            <div x-show="msg.time" :style="msg.type === 'user' ? 'text-align:right;font-size:0.6rem;color:#94a3b8;margin-top:3px' : 'font-size:0.6rem;color:#94a3b8;margin-top:3px'" x-text="msg.time"></div>
+                        </div>
+                    </div>
+                </template>
+
+                {{-- Typing indicator --}}
+                <div x-show="isTyping" style="display:flex;gap:8px;align-items:flex-end">
+                    <div style="width:26px;height:26px;border-radius:50%;background:#ede9fe;display:flex;align-items:center;justify-content:center;font-size:0.8rem">🤖</div>
+                    <div style="background:#fff;border:1px solid #e2e8f0;border-radius:18px 18px 18px 4px;padding:10px 14px;display:flex;gap:4px;align-items:center">
+                        <span style="width:7px;height:7px;border-radius:50%;background:#a5b4fc;animation:bounce-dot 0.8s infinite"></span>
+                        <span style="width:7px;height:7px;border-radius:50%;background:#a5b4fc;animation:bounce-dot 0.8s 0.2s infinite"></span>
+                        <span style="width:7px;height:7px;border-radius:50%;background:#a5b4fc;animation:bounce-dot 0.8s 0.4s infinite"></span>
                     </div>
                 </div>
             </div>
 
-            <div style="padding:12px;border-top:1px solid var(--border);background:#fff">
-                <div style="display:flex;align-items:center;gap:8px;padding:8px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--primary-50)">
-                    <input type="text" placeholder="Type a message…" style="flex:1;background:transparent;border:none;outline:none;font-size:0.8rem;color:var(--text-primary);font-family:'Inter',sans-serif">
-                    <button style="background:var(--primary);color:#fff;border:none;width:28px;height:28px;border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background 0.15s" onmouseover="this.style.background='var(--primary-hover)'" onmouseout="this.style.background='var(--primary)'">
-                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z"/></svg>
+            {{-- Input --}}
+            <div style="padding:12px;border-top:1px solid #e2e8f0;background:#fff">
+                <form @submit.prevent="sendMessage" style="display:flex;gap:8px;align-items:center">
+                    <input type="text" x-model="newMessage"
+                           @keydown.enter.prevent="sendMessage"
+                           placeholder="Ask me anything..."
+                           :disabled="isTyping"
+                           style="flex:1;border:1px solid #e2e8f0;border-radius:50px;padding:9px 16px;font-size:0.8rem;outline:none;font-family:inherit;color:#1e293b;background:#f8fafc;transition:border-color 0.15s"
+                           onfocus="this.style.borderColor='#6366f1'" onblur="this.style.borderColor='#e2e8f0'">
+                    <button type="submit" :disabled="!newMessage.trim() || isTyping"
+                            style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#4f46e5,#7c3aed);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:opacity 0.15s"
+                            :style="!newMessage.trim() || isTyping ? 'opacity:0.5;cursor:not-allowed' : 'opacity:1'">
+                        <svg style="width:16px;height:16px;color:#fff" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
+                        </svg>
                     </button>
-                </div>
+                </form>
             </div>
         </div>
     </div>
+
+    <style>
+    @keyframes pulse-dot { 0%,100%{opacity:1} 50%{opacity:0.4} }
+    @keyframes bounce-dot { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-5px)} }
+    </style>
+
 
     <script>
         // Sync sidebar margin with Alpine toggle on desktop
