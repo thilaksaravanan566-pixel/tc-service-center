@@ -59,7 +59,7 @@
                 <div class="text-xs text-slate-500 font-medium leading-relaxed space-y-0.5">
                     <p>123 Tech Hub, Electronics Street</p>
                     <p>Chennai, Tamil Nadu - 600001</p>
-                    <p class="flex items-center gap-2"><span class="w-1.5 h-1.5 bg-indigo-500 rounded-full"></span> +91 98765 43210</p>
+                    <p class="flex items-center gap-2"><span class="w-1.5 h-1.5 bg-indigo-500 rounded-full"></span> {{ \App\Models\CompanyProfile::first()->phone ?? '+91 98765 43210' }}</p>
                     <p class="flex items-center gap-2"><span class="w-1.5 h-1.5 bg-indigo-500 rounded-full"></span> GSTIN: 33AAACG1234A1Z5</p>
                 </div>
             </div>

@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -167,7 +167,7 @@
                     123 Luxury Tech Boulevard, Silicon Valley<br>
                     Bengaluru, Karnataka - 560001<br>
                     GSTIN: 29AABBCC1234D1Z5<br>
-                    support@tcservice.com | +91 98765 43210
+                    {{ \App\Models\CompanyProfile::first()->email ?? 'support@tcservice.com' }} | {{ \App\Models\CompanyProfile::first()->phone ?? '+91 98765 43210' }}
                 </td>
             </tr>
         </table>

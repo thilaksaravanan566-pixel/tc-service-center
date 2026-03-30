@@ -275,11 +275,16 @@
                     </div>
                     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-bottom:24px">
                         @php
+                        $company = \App\Models\CompanyProfile::first();
+                        $phone = config('custom.company_phone') ?: ($company?->phone ?: '+91 98765 43210');
+                        $email = config('custom.company_email') ?: ($company?->email ?: 'support@thambu.in');
+                        $address = config('custom.company_address') ?: ($company?->address ?: 'Chennai, TN');
+
                         $contacts = [
-                            ['icon' => '📞', 'title' => 'Call Us',       'val' => '+91 98765 43210', 'sub' => 'Mon–Sat · 9AM–7PM'],
-                            ['icon' => '📧', 'title' => 'Email',         'val' => 'support@thambu.in','sub' => 'Reply within 24h'],
+                            ['icon' => '📞', 'title' => 'Call Us',       'val' => $phone, 'sub' => 'Mon–Sat · 9AM–7PM'],
+                            ['icon' => '📧', 'title' => 'Email',         'val' => $email, 'sub' => 'Reply within 24h'],
                             ['icon' => '💬', 'title' => 'Live Chat',     'val' => 'AI Assistant',    'sub' => 'Available 24/7'],
-                            ['icon' => '📍', 'title' => 'Our Location',  'val' => 'Chennai, TN',     'sub' => 'Visit us in person'],
+                            ['icon' => '📍', 'title' => 'Our Location',  'val' => Str::limit($address, 30), 'sub' => 'Visit us in person'],
                         ];
                         @endphp
                         @foreach($contacts as $c)
