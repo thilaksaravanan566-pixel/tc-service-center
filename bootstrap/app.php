@@ -38,9 +38,13 @@ return Application::configure(basePath: dirname(__DIR__))
             'delivery_partner' => \App\Http\Middleware\DeliveryMiddleware::class,
         ]);
 
-        // 2. Global Middleware (Optional: Add common settings here)
+        // 2. Exclude login routes from CSRF to avoid 419 Page Expired behind proxies/load balancers
         $middleware->validateCsrfTokens(except: [
-            '/customer/login', // Avoid 419/418 Page Expired during external API testing on web auth
+            '/login',           // admin login
+            '/customer/login',  // customer login
+            '/dealer/login',    // dealer login
+            '/technician/login',// technician login
+            '/delivery/login',  // delivery partner login
         ]);
 
         $middleware->redirectGuestsTo('/login');
