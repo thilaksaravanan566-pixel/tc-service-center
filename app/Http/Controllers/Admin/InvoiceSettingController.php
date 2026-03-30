@@ -49,6 +49,15 @@ class InvoiceSettingController extends Controller
 
         $company->save();
 
+        // Also sync to the settings table so config('custom.*') stays in sync
+        \App\Models\Setting::set('company_name',    $company->name,    'company');
+        \App\Models\Setting::set('support_phone',   $company->phone,   'company');
+        \App\Models\Setting::set('support_email',   $company->email,   'company');
+        \App\Models\Setting::set('company_address', $company->address, 'company');
+        if ($company->logo) {
+            \App\Models\Setting::set('company_logo', $company->logo, 'company');
+        }
+
         // Update Invoice Settings
         $setting = InvoiceSetting::first() ?? new InvoiceSetting();
         $setting->header_text = $request->input('header_text');
