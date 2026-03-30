@@ -4,14 +4,51 @@ namespace App\Http\Controllers\Customer;
 
 use App\Http\Controllers\Controller;
 use App\Models\SparePart;
+use Illuminate\Http\Request;
 
 class ShopController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        // Showcase only parts currently in stock
-        $parts = SparePart::where('stock', '>', 0)->latest()->get();
-        return view('shop.index', compact('parts'));
+        $query = SparePart::where('stock', '>', 0)->where('is_active', true);
+
+        // Search filter
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'ilike', "%{$search}%")
+                  ->orWhere('brand', 'ilike', "%{$search}%")
+                  ->orWhere('category', 'ilike', "%{$search}%")
+                  ->orWhere('description', 'ilike', "%{$search}%");
+            });
+        }
+
+        // Category filter
+        if ($request->filled('category') && $request->category !== 'all') {
+            $query->where('category', $request->category);
+        }
+
+        // Sort
+        $sort = $request->get('sort', 'latest');
+        match ($sort) {
+            'price_asc'  => $query->orderBy('price', 'asc'),
+            'price_desc' => $query->orderBy('price', 'desc'),
+            'name_asc'   => $query->orderBy('name', 'asc'),
+            default      => $query->latest(),
+        };
+
+        $parts = $query->get();
+
+        // Get unique categories for filter tabs
+        $categories = SparePart::where('stock', '>', 0)
+                                ->where('is_active', true)
+                                ->whereNotNull('category')
+                                ->distinct()
+                                ->pluck('category')
+                                ->sort()
+                                ->values();
+
+        return view('shop.index', compact('parts', 'categories'));
     }
 
     public function show($id)
