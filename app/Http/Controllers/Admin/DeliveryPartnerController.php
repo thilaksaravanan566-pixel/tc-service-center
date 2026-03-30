@@ -12,7 +12,7 @@ class DeliveryPartnerController extends Controller
 {
     public function index()
     {
-        $partners = User::whereIn('role', ['delivery_partner', 'delivery'])->latest()->paginate(15);
+        $partners = User::whereIn('role', ['delivery', 'delivery_partner'])->latest()->paginate(15);
         return view('admin.delivery_partners.index', compact('partners'));
     }
 
@@ -31,16 +31,22 @@ class DeliveryPartnerController extends Controller
             'vehicle_number' => 'nullable|string|max:50',
         ]);
 
-        User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'role' => 'delivery_partner',
-            'mobile' => $request->mobile,
-            'vehicle_number' => $request->vehicle_number,
-        ]);
+        try {
+            User::create([
+                'name'           => $request->name,
+                'email'          => $request->email,
+                'password'       => Hash::make($request->password),
+                'role'           => 'delivery',
+                'mobile'         => $request->mobile,
+                'vehicle_number' => $request->vehicle_number,
+                'salary'         => 0,
+                'is_online'      => false,
+            ]);
 
-        return redirect()->route('admin.delivery-partners.index')->with('success', 'Delivery Partner added successfully.');
+            return redirect()->route('admin.delivery-partners.index')->with('success', 'Delivery Partner added successfully.');
+        } catch (\Throwable $e) {
+            return back()->withInput()->with('error', 'Error adding delivery partner: ' . $e->getMessage());
+        }
     }
 
     public function edit($id)
@@ -62,9 +68,9 @@ class DeliveryPartnerController extends Controller
         ]);
 
         $data = [
-            'name' => $request->name,
-            'email' => $request->email,
-            'mobile' => $request->mobile,
+            'name'           => $request->name,
+            'email'          => $request->email,
+            'mobile'         => $request->mobile,
             'vehicle_number' => $request->vehicle_number,
         ];
 
@@ -72,15 +78,22 @@ class DeliveryPartnerController extends Controller
             $data['password'] = Hash::make($request->password);
         }
 
-        $partner->update($data);
-
-        return redirect()->route('admin.delivery-partners.index')->with('success', 'Delivery Partner updated successfully.');
+        try {
+            $partner->update($data);
+            return redirect()->route('admin.delivery-partners.index')->with('success', 'Delivery Partner updated successfully.');
+        } catch (\Throwable $e) {
+            return back()->withInput()->with('error', 'Error updating delivery partner: ' . $e->getMessage());
+        }
     }
 
     public function destroy($id)
     {
         $partner = User::findOrFail($id);
-        $partner->delete();
-        return redirect()->route('admin.delivery-partners.index')->with('success', 'Delivery Partner removed successfully.');
+        try {
+            $partner->delete();
+            return redirect()->route('admin.delivery-partners.index')->with('success', 'Delivery Partner removed successfully.');
+        } catch (\Throwable $e) {
+            return back()->with('error', 'Error removing delivery partner: ' . $e->getMessage());
+        }
     }
 }

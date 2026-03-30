@@ -13,6 +13,27 @@
 </div>
 
 <div class="max-w-4xl">
+
+    {{-- Session / DB errors --}}
+    @if(session('error'))
+    <div class="mb-5 flex items-start gap-3 bg-red-500/10 border border-red-500/20 text-red-400 text-sm font-medium px-4 py-3 rounded-xl">
+        <svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        {{ session('error') }}
+    </div>
+    @endif
+
+    {{-- Validation errors --}}
+    @if($errors->any())
+    <div class="mb-5 bg-red-500/10 border border-red-500/20 text-red-400 text-sm px-4 py-3 rounded-xl">
+        <p class="font-semibold mb-1">Please fix the following errors:</p>
+        <ul class="list-disc pl-4 space-y-0.5">
+            @foreach($errors->all() as $error)
+                <li class="text-xs">{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+    @endif
+
     <form action="{{ route('admin.dealers.store') }}" method="POST" class="space-y-6">
         @csrf
         
