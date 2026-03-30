@@ -354,9 +354,9 @@
     {{-- Bottom: User + Logout --}}
     <div class="p-3 border-t border-white/5 flex-shrink-0">
         <div class="flex items-center gap-3 p-2 rounded-lg hover:bg-white/5 transition cursor-pointer overflow-hidden">
-            <img src="https://ui-avatars.com/api/?name={{ urlencode(auth()->user()->name) }}&background=6366f1&color=fff&size=40" class="w-8 h-8 rounded-lg flex-shrink-0">
+            <img src="https://ui-avatars.com/api/?name={{ urlencode(auth()->user()->name ?? 'Admin') }}&background=6366f1&color=fff&size=40" class="w-8 h-8 rounded-lg flex-shrink-0">
             <div class="user-meta min-w-0 transition-all">
-                <p class="text-xs font-semibold text-white truncate">{{ auth()->user()->name }}</p>
+                <p class="text-xs font-semibold text-white truncate">{{ auth()->user()->name ?? 'Admin' }}</p>
                 <p class="text-[10px] text-gray-500">Administrator</p>
             </div>
         </div>
@@ -439,14 +439,14 @@
             {{-- Profile --}}
             <div class="relative" x-data="{ open: false }">
                 <button @click="open = !open" class="flex items-center gap-2 px-2 py-1 rounded-lg hover:bg-white/5 transition">
-                    <img src="https://ui-avatars.com/api/?name={{ urlencode(auth()->user()->name) }}&background=6366f1&color=fff&size=40" class="w-7 h-7 rounded-lg">
-                    <span class="hidden md:block text-xs font-semibold text-gray-300">{{ auth()->user()->name }}</span>
+                    <img src="https://ui-avatars.com/api/?name={{ urlencode(auth()->user()->name ?? 'Admin') }}&background=6366f1&color=fff&size=40" class="w-7 h-7 rounded-lg">
+                    <span class="hidden md:block text-xs font-semibold text-gray-300">{{ auth()->user()->name ?? 'Admin' }}</span>
                     <svg class="w-3 h-3 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                 </button>
                 <div x-show="open" @click.away="open = false" x-transition class="dropdown-panel" style="width:200px;">
                     <div class="px-4 py-3 border-b border-white/6">
-                        <p class="text-xs font-semibold text-white">{{ auth()->user()->name }}</p>
-                        <p class="text-[11px] text-gray-500">{{ auth()->user()->email }}</p>
+                        <p class="text-xs font-semibold text-white">{{ auth()->user()->name ?? 'Admin' }}</p>
+                        <p class="text-[11px] text-gray-500">{{ auth()->user()->email ?? 'No email' }}</p>
                     </div>
                     <div class="py-1">
                         <a href="{{ route('admin.customization.index') }}" class="flex items-center gap-2.5 px-4 py-2.5 text-xs text-gray-300 hover:text-white hover:bg-white/5 transition">

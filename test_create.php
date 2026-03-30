@@ -12,6 +12,6 @@ if ($admin) {
 try {
     $view = view('admin.dealers.create')->render();
     echo "Create View Rendered! Length: " . strlen($view) . "\n";
-} catch (\Throwable $e) {
-    file_put_contents('create_error.txt', $e->getMessage() . "\n" . $e->getTraceAsString());
+} catch (\Throwable $ex) {
+    echo "ERROR: " . $ex->getMessage() . "\n" . $ex->getFile() . ":" . $ex->getLine() . "\n";
 }
