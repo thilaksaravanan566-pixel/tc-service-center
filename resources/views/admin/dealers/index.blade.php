@@ -34,10 +34,10 @@
                 <tr class="group">
                     <td>
                         <div class="flex items-center gap-3">
-                            <img src="https://ui-avatars.com/api/?name={{ urlencode($dealer->user->name) }}&background=6366f1&color=fff&size=40" class="w-8 h-8 rounded-lg">
+                            <img src="https://ui-avatars.com/api/?name={{ urlencode($dealer->user->name ?? $dealer->business_name) }}&background=6366f1&color=fff&size=40" class="w-8 h-8 rounded-lg">
                             <div>
-                                <p class="text-sm font-semibold text-white group-hover:text-indigo-400 transition">{{ $dealer->user->name }}</p>
-                                <p class="text-xs text-gray-500">{{ $dealer->user->email }}</p>
+                                <p class="text-sm font-semibold text-white group-hover:text-indigo-400 transition">{{ $dealer->user->name ?? 'Unknown User' }}</p>
+                                <p class="text-xs text-gray-500">{{ $dealer->user->email ?? 'No email' }}</p>
                             </div>
                         </div>
                     </td>
@@ -49,7 +49,7 @@
                     </td>
                     <td>
                         <div class="inline-flex px-2 py-1 bg-white/5 border border-white/10 rounded text-xs font-semibold text-gray-300">
-                            {{ $dealer->user->serviceOrders->count() }}
+                            {{ optional($dealer->user)->serviceOrders ? $dealer->user->serviceOrders->count() : 0 }}
                         </div>
                     </td>
                     <td>
