@@ -82,7 +82,7 @@ Route::domain('dealer.' . $domain)
             return redirect()->route('dealer.dashboard');
         });
         Route::get('/login', function () {
-            return redirect()->route('login');
+            return redirect()->route('login.dealer');
         });
         Route::get('/dashboard', [App\Http\Controllers\Dealer\DashboardController::class, 'index'])->name('dashboard');
         Route::get('/services', [App\Http\Controllers\Dealer\ServiceController::class, 'index'])->name('services.index');
@@ -145,8 +145,8 @@ Route::domain('customer.' . $domain)
 Route::domain('technician.' . $domain)
     ->middleware(['auth', 'technician'])
     ->group(function () {
-        Route::get('/', function () {
-            return redirect()->to('/dashboard');
+        Route::get('/login', function () {
+            return redirect()->route('login.technician');
         });
         Route::get('/dashboard', [App\Http\Controllers\Technician\DashboardController::class, 'index'])
             ->name('technician.subdomain.dashboard');
@@ -170,8 +170,8 @@ Route::domain('technician.' . $domain)
 Route::domain('delivery.' . $domain)
     ->middleware(['auth', 'delivery_partner'])
     ->group(function () {
-        Route::get('/', function () {
-            return redirect()->to('/dashboard');
+        Route::get('/login', function () {
+            return redirect()->route('login.delivery');
         });
         Route::get('/dashboard', [App\Http\Controllers\Delivery\DashboardController::class, 'index'])
             ->name('delivery.subdomain.dashboard');

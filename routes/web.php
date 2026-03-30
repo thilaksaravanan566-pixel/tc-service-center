@@ -339,9 +339,7 @@ Route::group(['middleware' => ['auth', 'admin'], 'prefix' => 'admin', 'as' => 'a
 | Dealer Portal Routes
 |--------------------------------------------------------------------------
 */
-Route::get('dealer/login', function () {
-    return redirect()->route('login');
-});
+// removed so routes/auth.php handles dealer/login natively
 
 Route::group(['middleware' => ['auth', 'dealer'], 'prefix' => 'dealer', 'as' => 'dealer.'], function () {
     Route::get('/dashboard', [\App\Http\Controllers\Dealer\DashboardController::class, 'index'])->name('dashboard');

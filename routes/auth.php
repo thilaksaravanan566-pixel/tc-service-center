@@ -9,11 +9,15 @@ use Illuminate\Support\Facades\Route;
  */
 
 Route::middleware('guest')->group(function () {
-    // Show the Luxury Login Form
-    Route::get('login', [LoginController::class, 'showLoginForm'])
-                ->name('login');
+    // Show the Luxury Login Form (Admin default)
+    Route::get('login', [LoginController::class, 'showLoginForm'])->name('login');
+    
+    // Role-specific login pages
+    Route::get('dealer/login', [LoginController::class, 'showDealerLoginForm'])->name('login.dealer');
+    Route::get('technician/login', [LoginController::class, 'showTechnicianLoginForm'])->name('login.technician');
+    Route::get('delivery/login', [LoginController::class, 'showDeliveryLoginForm'])->name('login.delivery');
 
-    // Handle Login Attempt
+    // Handle Login Attempt (Global)
     Route::post('login', [LoginController::class, 'login']);
 
     // Forgot Password

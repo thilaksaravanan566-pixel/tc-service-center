@@ -13,6 +13,21 @@ class LoginController extends Controller
         return view('auth.login'); // Ensure this view exists in resources/views/auth/login.blade.php
     }
 
+    public function showDealerLoginForm()
+    {
+        return view('auth.login-dealer');
+    }
+
+    public function showTechnicianLoginForm()
+    {
+        return view('auth.login-technician');
+    }
+
+    public function showDeliveryLoginForm()
+    {
+        return view('auth.login-delivery');
+    }
+
     public function login(Request $request)
     {
         $credentials = $request->validate([
