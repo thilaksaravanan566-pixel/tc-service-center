@@ -10,16 +10,16 @@ class ShopController extends Controller
 {
     public function index(Request $request)
     {
-        $query = SparePart::where('stock', '>', 0)->where('is_active', true);
+        $query = SparePart::query()->where('stock', '>', 0)->where('is_active', true);
 
         // Search filter
         if ($request->filled('search')) {
-            $search = $request->search;
-            $query->where(function ($q) use ($search) {
-                $q->where('name', 'ilike', "%{$search}%")
-                  ->orWhere('brand', 'ilike', "%{$search}%")
-                  ->orWhere('category', 'ilike', "%{$search}%")
-                  ->orWhere('description', 'ilike', "%{$search}%");
+            $search = '%' . $request->search . '%';
+            $query->whereNested(function ($q) use ($search) {
+                $q->where('name', 'like', $search)
+                  ->orWhere('brand', 'like', $search)
+                  ->orWhere('category', 'like', $search)
+                  ->orWhere('description', 'like', $search);
             });
         }
 

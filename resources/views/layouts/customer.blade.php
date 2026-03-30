@@ -775,6 +775,7 @@
         document.addEventListener('alpine:init', () => {});
     </script>
 
+    @include('partials.password-toggle')
     @stack('scripts')
 
 </body>

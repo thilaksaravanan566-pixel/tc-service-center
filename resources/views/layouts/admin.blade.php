@@ -492,6 +492,7 @@
 
 </main>
 
+@include('partials.password-toggle')
 @stack('scripts')
 <script>
 // Sync sidebar state with AlpineJS on load
